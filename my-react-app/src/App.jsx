@@ -865,16 +865,15 @@ const Portfolio = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-auto">
                 {projects.map((project) => {
-                  // ดึง URL รูปภาพ หรือใช้ Placeholder fallback หากไม่มีรูป
+                  // 1. ตรวจสอบ URL รูปภาพจาก DB (ถ้าไม่มี ให้ใช้ Data URI SVG เพื่อป้องกัน 404 error)
                   const coverImage =
-                    (Array.isArray(project.images) && project.images[0]) ||
                     project.image_url ||
-                    project.cover_image ||
-                    "https://via.placeholder.com/600x400?text=No+Image";
+                    (Array.isArray(project.images) && project.images[0]) ||
+                    `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' font-family='sans-serif' font-size='24' fill='%2364748b' text-anchor='middle' dy='.3em'>${encodeURIComponent(project.title)}</text></svg>`;
 
                   return (
                     <motion.div
-                      key={project.id || project.title}
+                      key={project.id}
                       whileHover={{ y: -5 }}
                       onClick={() => setSelectedProject(project)}
                       className="group cursor-pointer"
@@ -885,10 +884,9 @@ const Portfolio = () => {
                           alt={project.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => {
-                            // หาก URL เสีย ให้แสดงภาพ Placeholder แทนการสั่ง display: none
+                            // ถ้ารูปจาก URL หลักโหลดไม่สำเร็จ ให้เปลี่ยนเป็น Placeholder SVG ทันที
                             e.target.onerror = null;
-                            e.target.src =
-                              "https://via.placeholder.com/600x400?text=Image+Not+Found";
+                            e.target.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' font-family='sans-serif' font-size='20' fill='%2394a3b8' text-anchor='middle' dy='.3em'>No Image Available</text></svg>`;
                           }}
                         />
                         {project.category && (
@@ -903,7 +901,7 @@ const Portfolio = () => {
                         {project.title}
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
-                        {project.short_desc || project.description}
+                        {project.short_desc}
                       </p>
                     </motion.div>
                   );
