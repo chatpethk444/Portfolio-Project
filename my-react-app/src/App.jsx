@@ -273,7 +273,6 @@ const Terminal = () => (
   </motion.div>
 );
 
-/* จุดปรับปรุงที่ 1: ปรับใช้ Field Names ให้ตรงกับ Schema จาก Database (snake_case) */
 const ProjectModal = ({ project, onClose }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFullSize, setIsFullSize] = useState(false);
@@ -296,7 +295,10 @@ const ProjectModal = ({ project, onClose }) => {
 
   if (!project) return null;
 
-  const currentImage = project.images?.[activeImageIndex] || "";
+  // รองรับทั้งแบบ array รูปภาพ (images) หรือรูปเดียว (image_url)
+  const imageList =
+    project.images || (project.image_url ? [project.image_url] : []);
+  const currentImage = imageList[activeImageIndex] || "";
 
   return (
     <AnimatePresence>
@@ -343,9 +345,9 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
 
-          {project.images && project.images.length > 1 && (
+          {imageList.length > 1 && (
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-thin">
-              {project.images.map((imgUrl, idx) => (
+              {imageList.map((imgUrl, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
@@ -372,11 +374,13 @@ const ProjectModal = ({ project, onClose }) => {
             {project.title}
           </h3>
 
+          {/* Map ข้อมูลคำอธิบาย: full_desc -> short_desc */}
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6 text-sm sm:text-base">
             {project.full_desc || project.short_desc}
           </p>
 
-          {project.tech_stack && (
+          {/* Map รายการ Tech Stack */}
+          {project.tech_stack && project.tech_stack.length > 0 && (
             <div className="mb-6">
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Technologies Used
@@ -394,7 +398,8 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
 
-          {project.features && (
+          {/* Map รายการ Key Features */}
+          {project.features && project.features.length > 0 && (
             <div className="mb-8">
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Key Features
@@ -407,6 +412,7 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
 
+          {/* Map ปุ่ม External Links */}
           <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
             {project.canva_url && (
               <a
@@ -589,14 +595,19 @@ const Portfolio = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch Projects จาก Backend API
+  // ปรับปรุง useEffect เพื่อบังคับ Debug ข้อมูลออก Console
   useEffect(() => {
+    console.log("🚀 Component Mounted: Starting fetchProjects..."); // Log บรรทัดนี้ต้องขึ้นทันทีเมื่อโหลดหน้า
+
     const fetchProjects = async () => {
       try {
         const response = await apiClient.get("/projects");
+        console.log("✅ API Success Response:", response);
+        console.log("📦 Projects JSON Data:", response.data);
         setProjects(response.data);
       } catch (err) {
-        console.error("Failed to load projects:", err);
+        console.error("❌ API Fetch Error Detail:", err);
+        console.error("❌ Response Data (if any):", err.response?.data);
         setError("ไม่สามารถโหลดข้อมูลโปรเจกต์ได้");
       } finally {
         setLoading(false);
@@ -831,7 +842,6 @@ const Portfolio = () => {
               </h2>
             </div>
 
-            {/* จุดปรับปรุงที่ 2 & 3: ปรับปรุงส่วนเรนเดอร์ข้อมูลแบบ Dynamic และรองรับการดึงข้อมูลจาก FastAPI */}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-auto">
                 {[1, 2].map((n) => (
@@ -854,36 +864,50 @@ const Portfolio = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-auto">
-                {projects.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    whileHover={{ y: -5 }}
-                    onClick={() => setSelectedProject(project)}
-                    className="group cursor-pointer"
-                  >
-                    <div className="w-full h-36 bg-gray-100 dark:bg-gray-800 rounded-xl mb-4 overflow-hidden relative border border-gray-200/50 dark:border-gray-700/50">
-                      <img
-                        src={project.images?.[0] || "/placeholder.png"}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                      <div className="absolute top-3 left-3 flex gap-2">
-                        <span className="text-[10px] font-semibold bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-900 dark:text-white px-2 py-1 rounded-md shadow-sm">
-                          {project.category}
-                        </span>
+                {projects.map((project) => {
+                  // ดึง URL รูปภาพ หรือใช้ Placeholder fallback หากไม่มีรูป
+                  const coverImage =
+                    (Array.isArray(project.images) && project.images[0]) ||
+                    project.image_url ||
+                    project.cover_image ||
+                    "https://via.placeholder.com/600x400?text=No+Image";
+
+                  return (
+                    <motion.div
+                      key={project.id || project.title}
+                      whileHover={{ y: -5 }}
+                      onClick={() => setSelectedProject(project)}
+                      className="group cursor-pointer"
+                    >
+                      <div className="w-full h-36 bg-gray-100 dark:bg-gray-800 rounded-xl mb-4 overflow-hidden relative border border-gray-200/50 dark:border-gray-700/50">
+                        <img
+                          src={coverImage}
+                          alt={project.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            // หาก URL เสีย ให้แสดงภาพ Placeholder แทนการสั่ง display: none
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://via.placeholder.com/600x400?text=Image+Not+Found";
+                          }}
+                        />
+                        {project.category && (
+                          <div className="absolute top-3 left-3 flex gap-2">
+                            <span className="text-[10px] font-semibold bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-900 dark:text-white px-2 py-1 rounded-md shadow-sm">
+                              {project.category}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:underline decoration-2 underline-offset-4 text-sm">
-                      {project.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
-                      {project.short_desc}
-                    </p>
-                  </motion.div>
-                ))}
+                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:underline decoration-2 underline-offset-4 text-sm">
+                        {project.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                        {project.short_desc || project.description}
+                      </p>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </motion.div>
