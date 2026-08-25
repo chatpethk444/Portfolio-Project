@@ -1,3 +1,4 @@
+@import "tailwindcss";
 /* 1. นำเข้าฟอนต์ทั้งหมดให้ครบถ้วน */
 @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap");
 
@@ -13,7 +14,8 @@
 
 /* 5. บังคับใช้ Font ให้กับ Body */
 @layer base {
-  html, body {
+  html,
+  body {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
