@@ -23,6 +23,14 @@ import {
   SiFastapi,
 } from "react-icons/si";
 
+// Helper function: ป้องกันรูปพังด้วย Data URI SVG Fallback
+const getSafeImageUrl = (url, title = "No Image") => {
+  if (url && typeof url === "string" && url.trim() !== "") {
+    return url;
+  }
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' font-family='sans-serif' font-size='20' fill='%2394a3b8' text-anchor='middle' dy='.3em'>${encodeURIComponent(title)}</text></svg>`;
+};
+
 const ThemeToggle = ({ darkMode, toggleDarkMode }) => {
   return (
     <button
@@ -273,6 +281,7 @@ const Terminal = () => (
   </motion.div>
 );
 
+// Improved Project Modal Component with Multi-Image Support & Fallback
 const ProjectModal = ({ project, onClose }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFullSize, setIsFullSize] = useState(false);
@@ -295,10 +304,17 @@ const ProjectModal = ({ project, onClose }) => {
 
   if (!project) return null;
 
-  // รองรับทั้งแบบ array รูปภาพ (images) หรือรูปเดียว (image_url)
   const imageList =
-    project.images || (project.image_url ? [project.image_url] : []);
-  const currentImage = imageList[activeImageIndex] || "";
+    Array.isArray(project.images) && project.images.length > 0
+      ? project.images
+      : project.image_url
+        ? [project.image_url]
+        : [];
+
+  const currentImage = getSafeImageUrl(
+    imageList[activeImageIndex],
+    project.title,
+  );
 
   return (
     <AnimatePresence>
@@ -326,25 +342,26 @@ const ProjectModal = ({ project, onClose }) => {
             ✕
           </button>
 
-          {currentImage && (
-            <div
-              onClick={() => setIsFullSize(true)}
-              className="w-full h-56 sm:h-72 rounded-2xl overflow-hidden mb-3 bg-gray-50 dark:bg-gray-950 relative cursor-zoom-in group flex items-center justify-center border border-gray-100 dark:border-gray-800"
-            >
-              <img
-                src={currentImage}
-                alt={`${project.title} screenshot`}
-                className="max-w-full max-h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                }}
-              />
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
-                🔍 คลิกเพื่อดูรูปขนาดเต็ม
-              </div>
+          {/* Main Image View */}
+          <div
+            onClick={() => setIsFullSize(true)}
+            className="w-full h-56 sm:h-72 rounded-2xl overflow-hidden mb-3 bg-gray-50 dark:bg-gray-950 relative cursor-zoom-in group flex items-center justify-center border border-gray-100 dark:border-gray-800"
+          >
+            <img
+              src={currentImage}
+              alt={`${project.title} preview`}
+              className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = getSafeImageUrl(null, "Image Load Failed");
+              }}
+            />
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
+              🔍 คลิกเพื่อดูรูปขนาดเต็ม
             </div>
-          )}
+          </div>
 
+          {/* Image Gallery Thumbnails */}
           {imageList.length > 1 && (
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-thin">
               {imageList.map((imgUrl, idx) => (
@@ -358,9 +375,13 @@ const ProjectModal = ({ project, onClose }) => {
                   }`}
                 >
                   <img
-                    src={imgUrl}
+                    src={getSafeImageUrl(imgUrl)}
                     alt={`thumb-${idx}`}
-                    className="max-w-full max-h-full object-contain p-0.5"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = getSafeImageUrl(null, "Error");
+                    }}
                   />
                 </button>
               ))}
@@ -374,12 +395,10 @@ const ProjectModal = ({ project, onClose }) => {
             {project.title}
           </h3>
 
-          {/* Map ข้อมูลคำอธิบาย: full_desc -> short_desc */}
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6 text-sm sm:text-base">
             {project.full_desc || project.short_desc}
           </p>
 
-          {/* Map รายการ Tech Stack */}
           {project.tech_stack && project.tech_stack.length > 0 && (
             <div className="mb-6">
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
@@ -398,7 +417,6 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
 
-          {/* Map รายการ Key Features */}
           {project.features && project.features.length > 0 && (
             <div className="mb-8">
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
@@ -412,7 +430,6 @@ const ProjectModal = ({ project, onClose }) => {
             </div>
           )}
 
-          {/* Map ปุ่ม External Links */}
           <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
             {project.canva_url && (
               <a
@@ -438,6 +455,7 @@ const ProjectModal = ({ project, onClose }) => {
           </div>
         </motion.div>
 
+        {/* Fullsize Lightbox */}
         <AnimatePresence>
           {isFullSize && (
             <motion.div
@@ -515,14 +533,12 @@ const ContactForm = () => {
           className="hidden"
           style={{ display: "none" }}
         />
-
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
             <div className="w-3 h-3 rounded-full bg-[#f59e0b]" />
             <div className="w-3 h-3 rounded-full bg-[#10b981]" />
           </div>
-
           <label className="block text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">
             NAME
           </label>
@@ -590,30 +606,22 @@ const ContactForm = () => {
 const Portfolio = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [selectedProject, setSelectedProject] = useState(null);
-
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ปรับปรุง useEffect เพื่อบังคับ Debug ข้อมูลออก Console
   useEffect(() => {
-    console.log("🚀 Component Mounted: Starting fetchProjects..."); // Log บรรทัดนี้ต้องขึ้นทันทีเมื่อโหลดหน้า
-
     const fetchProjects = async () => {
       try {
         const response = await apiClient.get("/projects");
-        console.log("✅ API Success Response:", response);
-        console.log("📦 Projects JSON Data:", response.data);
         setProjects(response.data);
       } catch (err) {
-        console.error("❌ API Fetch Error Detail:", err);
-        console.error("❌ Response Data (if any):", err.response?.data);
+        console.error("❌ API Fetch Error:", err);
         setError("ไม่สามารถโหลดข้อมูลโปรเจกต์ได้");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProjects();
   }, []);
 
@@ -676,7 +684,6 @@ const Portfolio = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-slate-900 dark:text-white transition-colors duration-300 font-sans">
-      {/* Navbar */}
       <motion.nav
         initial={{ y: -50, opacity: 0, x: "-50%" }}
         animate={{ y: 0, opacity: 1, x: "-50%" }}
@@ -757,7 +764,7 @@ const Portfolio = () => {
             variants={fadeInUp}
             className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 md:mb-8 text-left"
           >
-            Hi,I'm Chatpeth Karisuk
+            Hi, I'm Chatpeth Karisuk
           </motion.h1>
 
           <motion.h1
@@ -865,10 +872,12 @@ const Portfolio = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-auto">
                 {projects.map((project) => {
-                  // 1. ตรวจสอบ URL รูปภาพ หากไม่มีให้สร้าง Dynamic SVG Placeholder จากชื่อโปรเจกต์
-                  const defaultPlaceholder = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' font-family='sans-serif' font-size='22' fill='%2394a3b8' text-anchor='middle' dy='.3em'>${encodeURIComponent(project.title || "Project")}</text></svg>`;
+                  const rawCover =
+                    Array.isArray(project.images) && project.images.length > 0
+                      ? project.images[0]
+                      : project.image_url;
 
-                  const coverImage = project.image_url || defaultPlaceholder;
+                  const coverImage = getSafeImageUrl(rawCover, project.title);
 
                   return (
                     <motion.div
@@ -883,9 +892,8 @@ const Portfolio = () => {
                           alt={project.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => {
-                            // 2. หาก URL รูปภาพเสีย (404/พัง) ให้เปลี่ยนไปใช้ Fallback SVG ทันที ห้ามสั่ง display = 'none'
                             e.target.onerror = null;
-                            e.target.src = defaultPlaceholder;
+                            e.target.src = getSafeImageUrl(null, "Image Error");
                           }}
                         />
                         {project.category && (
@@ -895,6 +903,12 @@ const Portfolio = () => {
                             </span>
                           </div>
                         )}
+                        {Array.isArray(project.images) &&
+                          project.images.length > 1 && (
+                            <span className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-md">
+                              📷 +{project.images.length - 1}
+                            </span>
+                          )}
                       </div>
                       <h3 className="font-semibold text-gray-900 dark:text-white group-hover:underline decoration-2 underline-offset-4 text-sm">
                         {project.title}
@@ -919,7 +933,6 @@ const Portfolio = () => {
         <h2 className="text-2xl md:text-4xl font-bold mb-4 text-center max-w-2xl leading-tight">
           Contact Me
         </h2>
-        <p className="text-gray-400 text-xs sm:text-sm max-w-md text-center mb-4"></p>
         <ContactForm />
         <div className="w-full max-w-7xl border-t border-gray-800 pt-8 mt-16 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
           <p>
@@ -927,23 +940,18 @@ const Portfolio = () => {
           </p>
           <div className="flex space-x-6">
             <a
-              href="#"
+              href="https://github.com/chatpethk444"
+              target="_blank"
+              rel="noreferrer"
               className="hover:text-white transition-colors"
-              onClick={() =>
-                window.open("https://github.com/chatpethk444", "_blank")
-              }
             >
               <FaGithub className="w-5 h-5" />
             </a>
             <a
-              href="#"
+              href="https://linkedin.com/in/chatpeth-karisuk-7305052ab"
+              target="_blank"
+              rel="noreferrer"
               className="hover:text-white transition-colors"
-              onClick={() =>
-                window.open(
-                  "https://linkedin.com/in/chatpeth-karisuk-7305052ab",
-                  "_blank",
-                )
-              }
             >
               <FaLinkedin className="w-5 h-5" />
             </a>
@@ -951,6 +959,7 @@ const Portfolio = () => {
         </div>
       </footer>
 
+      {/* Render Single Integrated Modal */}
       <ProjectModal
         project={selectedProject}
         onClose={() => setSelectedProject(null)}

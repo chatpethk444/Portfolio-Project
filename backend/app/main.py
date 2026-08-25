@@ -39,7 +39,7 @@ class ProjectResponse(BaseModel):
     category: str
     short_desc: str
     full_desc: Optional[str] = ""
-    image_url: Optional[str] = None
+    images: List[str] = Field(default_factory=list) # 🟢 เปลี่ยนเป็น List[str] รองรับหลายรูป
     tech_stack: Optional[List[str]] = Field(default_factory=list)
     features: Optional[List[str]] = Field(default_factory=list)
     github_url: Optional[str] = None
@@ -48,6 +48,8 @@ class ProjectResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+        
 
 @app.get(
     "/projects",
@@ -82,3 +84,25 @@ def get_projects():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal Database Query Error: {str(e)}"
         )
+
+@app.get("/projects", response_model=List[ProjectResponse])
+def get_projects():
+    try:
+        response = (
+            supabase.table("projects")
+            .select("id, title, category, short_desc, full_desc, images, tech_stack, features, github_url, canva_url, created_at")
+            .order("created_at", desc=True)
+            .execute()
+        )
+        
+        sanitized_data = []
+        for item in response.data:
+            # 🟢 กัน NULL โดยการกำหนด Empty Array เป็น Fallback
+            item["images"] = item.get("images") or []
+            item["tech_stack"] = item.get("tech_stack") or []
+            item["features"] = item.get("features") or []
+            sanitized_data.append(item)
+            
+        return sanitized_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
