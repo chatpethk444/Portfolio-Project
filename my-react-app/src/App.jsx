@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FiSun, FiMoon } from "react-icons/fi";
-import { apiClient } from "./api/client";
+import apiClient from "./api/client";
 
 import {
   SiReact,
