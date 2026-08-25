@@ -10,34 +10,20 @@ from supabase import create_client, Client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 🟢 redirect_slashes=False เพื่อป้องกัน 307 Redirect ที่ทำให้ CORS Header หลุด
+# ป้องกันปัญหา 307 Redirect ที่ทำให้ CORS Header หลุด
 app = FastAPI(title="Portfolio API", version="1.0.0", redirect_slashes=False)
 
-# 🟢 1. CORS Sanitization Logic
-raw_origins = os.getenv("ALLOWED_ORIGINS", "")
-# แยก string ด้วย comma, ลบ whitespace และ trailing slash ออกทั้งหมด
-parsed_origins = [o.strip().rstrip("/") for o in raw_origins.split(",") if o.strip()]
-
-default_origins = [
-    "https://portfolio-project-tawny-ten.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000"
-]
-
-# รวม List และตัดตัวซ้ำ
-origins = list(set(parsed_origins + default_origins))
-logger.info(f"Loaded CORS Allowed Origins: {origins}")
-
+# 🟢 CORS Setup: อนุญาตทุก Origin ("*") โดยไม่ต้องใช้ ALLOWED_ORIGINS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],        # เปิดรับ Request จากทุก Domain (Vercel, Localhost, ฯลฯ)
+    allow_credentials=False,    # ต้องเป็น False เมื่อใช้ allow_origins=["*"] ตามมาตรฐานความปลอดภัย HTTP
+    allow_methods=["*"],        # อนุญาตทุก HTTP Methods (GET, POST, OPTIONS, ฯลฯ)
+    allow_headers=["*"],        # อนุญาตทุก Headers
     expose_headers=["*"],
 )
 
-# Supabase Client Initialization
+# Supabase Initialization
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://your-supabase-id.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "your-anon-key")
 
@@ -63,12 +49,10 @@ class ProjectResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# 🟢 2. Health Check Endpoint สำหรับ Ping ปลุก Render
 @app.get("/health", status_code=status.HTTP_200_OK)
 def health_check():
     return {"status": "ok", "message": "Backend is active"}
 
-# 🟢 3. รองรับทั้ง /projects และ /projects/
 @app.get("/projects", response_model=List[ProjectResponse], status_code=status.HTTP_200_OK)
 @app.get("/projects/", response_model=List[ProjectResponse], include_in_schema=False)
 def get_projects():
