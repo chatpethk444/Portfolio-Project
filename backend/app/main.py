@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from supabase._async.client import create_client as create_async_client, AsyncClient
+from supabase import create_client, Client
 
 app = FastAPI(title="Portfolio API", version="1.0.0")
 
@@ -18,13 +18,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. Environment Variables & Supabase Async Client Initialization
+# 2. Supabase Client Initialization
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://your-supabase-id.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "your-anon-key")
 
-supabase: AsyncClient = create_async_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# 3. Pydantic Response Schema (Data Validation)
+# 3. Pydantic Response Schema
 class ProjectResponse(BaseModel):
     id: int
     title: str
@@ -48,9 +48,9 @@ class ProjectResponse(BaseModel):
     status_code=status.HTTP_200_OK,
     summary="Get all portfolio projects"
 )
-async def get_projects():
+def get_projects():
     try:
-        response = await (
+        response = (
             supabase.table("projects")
             .select(
                 "id, title, category, short_desc, full_desc, "
@@ -61,6 +61,8 @@ async def get_projects():
         )
         return response.data
     except Exception as e:
+        # พิมพ์ Error log ฝั่ง Server เพื่อใช้วิเคราะห์
+        print(f"Server Internal Error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"Database Query Error: {str(e)}"
