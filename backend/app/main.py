@@ -7,20 +7,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from supabase import create_client, Client
 
-# Configure Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Portfolio API", version="1.0.0")
+# 🟢 redirect_slashes=False เพื่อป้องกัน 307 Redirect ที่ทำให้ CORS Header หลุด
+app = FastAPI(title="Portfolio API", version="1.0.0", redirect_slashes=False)
 
-# CORS Setup
-origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# 🟢 1. CORS Sanitization Logic
+raw_origins = os.getenv("ALLOWED_ORIGINS", "")
+# แยก string ด้วย comma, ลบ whitespace และ trailing slash ออกทั้งหมด
+parsed_origins = [o.strip().rstrip("/") for o in raw_origins.split(",") if o.strip()]
+
+default_origins = [
+    "https://portfolio-project-tawny-ten.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000"
+]
+
+# รวม List และตัดตัวซ้ำ
+origins = list(set(parsed_origins + default_origins))
+logger.info(f"Loaded CORS Allowed Origins: {origins}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Supabase Client Initialization
@@ -33,7 +47,6 @@ except Exception as e:
     logger.error(f"Failed to initialize Supabase client: {str(e)}")
     supabase = None
 
-# Safe Response Model with Backward Compatibility & Null Safety
 class ProjectResponse(BaseModel):
     id: int
     title: str
@@ -50,11 +63,14 @@ class ProjectResponse(BaseModel):
     class Config:
         from_attributes = True
 
-@app.get(
-    "/projects",
-    response_model=List[ProjectResponse],
-    status_code=status.HTTP_200_OK
-)
+# 🟢 2. Health Check Endpoint สำหรับ Ping ปลุก Render
+@app.get("/health", status_code=status.HTTP_200_OK)
+def health_check():
+    return {"status": "ok", "message": "Backend is active"}
+
+# 🟢 3. รองรับทั้ง /projects และ /projects/
+@app.get("/projects", response_model=List[ProjectResponse], status_code=status.HTTP_200_OK)
+@app.get("/projects/", response_model=List[ProjectResponse], include_in_schema=False)
 def get_projects():
     if not supabase:
         raise HTTPException(
@@ -63,7 +79,6 @@ def get_projects():
         )
         
     try:
-        # Query Data from Supabase (Select ทั้ง images และ image_url เพื่อรองรับโครงสร้าง DB เดิม)
         response = (
             supabase.table("projects")
             .select("id, title, category, short_desc, full_desc, images, image_url, tech_stack, features, github_url, canva_url, created_at")
@@ -75,7 +90,6 @@ def get_projects():
         sanitized_data = []
         
         for item in raw_data:
-            # 🟢 Fallback Logic: ถ้าไม่มี images (Array) แต่มี image_url (String) ให้แปลงเป็น List
             images = item.get("images")
             image_url = item.get("image_url")
             
@@ -86,7 +100,6 @@ def get_projects():
             else:
                 item["images"] = []
 
-            # 🟢 Sanitize NULL List fields
             item["tech_stack"] = item.get("tech_stack") or []
             item["features"] = item.get("features") or []
             
