@@ -12,7 +12,7 @@ const ContactForm = () => {
 
     const formData = new FormData(e.target);
 
-    // ลงทะเบียนรับ Access Key ฟรีได้ที่ https://web3forms.com
+    // Access Key  https://web3forms.com
     formData.append("access_key", "2ea60d4f-c11f-4c63-a278-c2fcd1733516");
 
     try {
