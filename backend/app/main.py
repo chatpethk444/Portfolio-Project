@@ -1,34 +1,67 @@
 import os
-from fastapi import FastAPI, HTTPException
+from typing import List, Optional
+from datetime import datetime
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from supabase import create_client, Client
+from pydantic import BaseModel, Field
+from supabase._async.client import create_client as create_async_client, AsyncClient
 
-app = FastAPI(title="Portfolio API")
+app = FastAPI(title="Portfolio API", version="1.0.0")
 
+# 1. CORS Configuration
+origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ดึง Config จาก Environment Variables หรือใช้ค่า Direct
+# 2. Environment Variables & Supabase Async Client Initialization
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://your-supabase-id.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "your-anon-key")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: AsyncClient = create_async_client(SUPABASE_URL, SUPABASE_KEY)
 
-@app.get("/projects")
-def get_projects():
+# 3. Pydantic Response Schema (Data Validation)
+class ProjectResponse(BaseModel):
+    id: int
+    title: str
+    category: str
+    short_desc: str
+    full_desc: Optional[str] = None
+    image_url: Optional[str] = None
+    tech_stack: List[str] = Field(default_factory=list)
+    features: List[str] = Field(default_factory=list)
+    github_url: Optional[str] = None
+    canva_url: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+# 4. API Endpoints
+@app.get(
+    "/projects", 
+    response_model=List[ProjectResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get all portfolio projects"
+)
+async def get_projects():
     try:
-        # ดึงข้อมูล Projects ทั้งหมด เรียงจากใหม่ไปเก่า
-        response = (
+        response = await (
             supabase.table("projects")
-            .select("id, title, category, short_desc, full_desc, tech_stack, features, github_url, canva_url, created_at,image_url")
+            .select(
+                "id, title, category, short_desc, full_desc, "
+                "tech_stack, features, github_url, canva_url, created_at, image_url"
+            )
             .order("created_at", desc=True)
             .execute()
         )
         return response.data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database Query Error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=f"Database Query Error: {str(e)}"
+        )
