@@ -31,17 +31,18 @@ try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 except Exception as e:
     logger.error(f"Failed to initialize Supabase client: {str(e)}")
+    supabase = None
 
-# Safe Response Model with Fallbacks
+# Safe Response Model with Backward Compatibility & Null Safety
 class ProjectResponse(BaseModel):
     id: int
     title: str
     category: str
     short_desc: str
     full_desc: Optional[str] = ""
-    images: List[str] = Field(default_factory=list) # 🟢 เปลี่ยนเป็น List[str] รองรับหลายรูป
-    tech_stack: Optional[List[str]] = Field(default_factory=list)
-    features: Optional[List[str]] = Field(default_factory=list)
+    images: List[str] = Field(default_factory=list)
+    tech_stack: List[str] = Field(default_factory=list)
+    features: List[str] = Field(default_factory=list)
     github_url: Optional[str] = None
     canva_url: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -49,31 +50,46 @@ class ProjectResponse(BaseModel):
     class Config:
         from_attributes = True
 
-        
-
 @app.get(
     "/projects",
     response_model=List[ProjectResponse],
     status_code=status.HTTP_200_OK
 )
 def get_projects():
+    if not supabase:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Supabase client is not initialized"
+        )
+        
     try:
-        # Query Data from Supabase
+        # Query Data from Supabase (Select ทั้ง images และ image_url เพื่อรองรับโครงสร้าง DB เดิม)
         response = (
             supabase.table("projects")
-            .select("id, title, category, short_desc, full_desc, tech_stack, features, github_url, canva_url, created_at, image_url")
+            .select("id, title, category, short_desc, full_desc, images, image_url, tech_stack, features, github_url, canva_url, created_at")
             .order("created_at", desc=True)
             .execute()
         )
         
-        # Safe extraction of response data
-        raw_data = getattr(response, "data", [])
-        
-        # Sanitize list fields to prevent validation error when NULL in DB
+        raw_data = getattr(response, "data", []) or []
         sanitized_data = []
+        
         for item in raw_data:
+            # 🟢 Fallback Logic: ถ้าไม่มี images (Array) แต่มี image_url (String) ให้แปลงเป็น List
+            images = item.get("images")
+            image_url = item.get("image_url")
+            
+            if isinstance(images, list) and len(images) > 0:
+                item["images"] = images
+            elif image_url:
+                item["images"] = [image_url]
+            else:
+                item["images"] = []
+
+            # 🟢 Sanitize NULL List fields
             item["tech_stack"] = item.get("tech_stack") or []
             item["features"] = item.get("features") or []
+            
             sanitized_data.append(item)
             
         return sanitized_data
@@ -84,25 +100,3 @@ def get_projects():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal Database Query Error: {str(e)}"
         )
-
-@app.get("/projects", response_model=List[ProjectResponse])
-def get_projects():
-    try:
-        response = (
-            supabase.table("projects")
-            .select("id, title, category, short_desc, full_desc, images, tech_stack, features, github_url, canva_url, created_at")
-            .order("created_at", desc=True)
-            .execute()
-        )
-        
-        sanitized_data = []
-        for item in response.data:
-            # 🟢 กัน NULL โดยการกำหนด Empty Array เป็น Fallback
-            item["images"] = item.get("images") or []
-            item["tech_stack"] = item.get("tech_stack") or []
-            item["features"] = item.get("features") or []
-            sanitized_data.append(item)
-            
-        return sanitized_data
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
