@@ -1,0 +1,15 @@
+# Environment Variables (SECURITY CRITICAL)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dependencies & Build Files
+**/node_modules/
+**/dist/
+**/build/
+
+# Python Cache & Virtual Environment
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/venv/
