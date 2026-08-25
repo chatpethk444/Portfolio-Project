@@ -25,7 +25,7 @@ def get_projects():
         # ดึงข้อมูล Projects ทั้งหมด เรียงจากใหม่ไปเก่า
         response = (
             supabase.table("projects")
-            .select("id, title, category, short_desc, full_desc, tech_stack, features, github_url, canva_url, created_at")
+            .select("id, title, category, short_desc, full_desc, tech_stack, features, github_url, canva_url, created_at,image_url")
             .order("created_at", desc=True)
             .execute()
         )
