@@ -21,6 +21,8 @@ import {
   SiCplusplus,
   SiVite,
   SiFastapi,
+  SiCss,
+  SiMqtt,
 } from "react-icons/si";
 
 // Helper function: ป้องกันรูปพังด้วย Data URI SVG Fallback
@@ -75,10 +77,12 @@ const Programming_Languages_ITEMS = [
   { name: "C++", icon: SiCplusplus, color: "#A8B9CC" },
   { name: "HTML", icon: SiHtml5, color: "#E34C26" },
   { name: "JavaScript", icon: SiNodedotjs, color: "#c7a71b" },
-  { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
 ];
 
-const FRAMEWORKS_ITEMS = [{ name: "React", icon: SiReact, color: "#61DAFB" }];
+const FRAMEWORKS_ITEMS = [
+  { name: "React", icon: SiReact, color: "#61DAFB" },
+  { name: "Css", icon: SiCss, color: "#1b8ce2" },
+];
 const DATABASE_ITEMS = [
   { name: "PostgreSQL", icon: SiPostgresql, color: "#4169E1" },
   { name: "MySQL", icon: SiMysql, color: "#4169E1" },
@@ -89,6 +93,8 @@ const TOOLS_ITEMS = [
   { name: "Git", icon: SiGit, color: "#F05032" },
   { name: "GitHub", icon: SiGithub, color: null },
   { name: "Vite", icon: SiVite, color: "#646CFF" },
+  { name: "Mqtt", icon: SiMqtt, color: "#1c76ab" },
+
 ];
 const BACKEND_ITEMS = [{ name: "FastAPI", icon: SiFastapi, color: "#009688" }];
 
@@ -438,7 +444,7 @@ const ProjectModal = ({ project, onClose }) => {
                 rel="noreferrer"
                 className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium text-sm rounded-xl hover:opacity-90 transition-opacity"
               >
-                Canva
+                Docs
               </a>
             )}
             {project.github_url && (
