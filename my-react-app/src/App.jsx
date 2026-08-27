@@ -94,7 +94,6 @@ const TOOLS_ITEMS = [
   { name: "GitHub", icon: SiGithub, color: null },
   { name: "Vite", icon: SiVite, color: "#646CFF" },
   { name: "Mqtt", icon: SiMqtt, color: "#1c76ab" },
-
 ];
 const BACKEND_ITEMS = [{ name: "FastAPI", icon: SiFastapi, color: "#009688" }];
 
@@ -455,7 +454,7 @@ const ProjectModal = ({ project, onClose }) => {
                 className="px-6 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-medium text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
               >
                 <FaGithub className="w-5 h-5" />
-                <span>GitHub</span>
+                <span>GitHub Repository</span>
               </a>
             )}
           </div>
