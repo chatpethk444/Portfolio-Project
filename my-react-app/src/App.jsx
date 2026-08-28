@@ -782,13 +782,15 @@ const Portfolio = () => {
             variants={fadeInUp}
             className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-8 max-w-lg leading-relaxed text-left"
           >
-            A motivated 4th-year seeking an Co-operative / internship in
-            Software Testing / QA, IT Support, or related fields. Brings
-            hands-on experience in IT support and hardware troubleshooting,
-            combined with a strong work ethic, adaptability, and the ability to
-            perform effectively under pressure. Eager to apply academic
-            knowledge to solve real-world technical problems and contribute to
-            team success.
+            Driven 4th-year Computer Engineering student seeking a Cooperative
+            Education or Internship position in Software Testing / QA or
+            Full-Stack Development. Offers a robust technical foundation in
+            end-to-end web application development and hardware systems
+            integration. Skilled in leveraging engineering problem-solving
+            methodologies to tackle real-world challenges. Highly adaptable,
+            eager to master emerging technologies, and proven capable of
+            collaborating effectively in fast-paced team environments to deliver
+            high-quality deliverables under pressure.
           </motion.p>
           <motion.div
             variants={fadeInUp}
