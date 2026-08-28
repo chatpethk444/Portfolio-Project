@@ -783,7 +783,7 @@ const Portfolio = () => {
             className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-8 max-w-lg leading-relaxed text-left"
           >
             Driven 4th-year Computer Engineering student seeking a Cooperative
-            Education or Internship position in Software Testing / QA or
+            Education or Internship position in Software Tester / QA or
             Full-Stack Development. Offers a robust technical foundation in
             end-to-end web application development and hardware systems
             integration. Skilled in leveraging engineering problem-solving
