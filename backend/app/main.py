@@ -10,28 +10,35 @@ from supabase import create_client, Client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ป้องกันปัญหา 307 Redirect ที่ทำให้ CORS Header หลุด
 app = FastAPI(title="Portfolio API", version="1.0.0", redirect_slashes=False)
 
-# 🟢 CORS Setup: อนุญาตทุก Origin ("*") โดยไม่ต้องใช้ ALLOWED_ORIGINS
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # เปิดรับ Request จากทุก Domain (Vercel, Localhost, ฯลฯ)
-    allow_credentials=False,    # ต้องเป็น False เมื่อใช้ allow_origins=["*"] ตามมาตรฐานความปลอดภัย HTTP
-    allow_methods=["*"],        # อนุญาตทุก HTTP Methods (GET, POST, OPTIONS, ฯลฯ)
-    allow_headers=["*"],        # อนุญาตทุก Headers
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["*"],
 )
 
-# Supabase Initialization
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://your-supabase-id.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "your-anon-key")
+# Safe Lazy Initialization for Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
-try:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-except Exception as e:
-    logger.error(f"Failed to initialize Supabase client: {str(e)}")
-    supabase = None
+supabase: Optional[Client] = None
+
+@app.on_event("startup")
+def startup_event():
+    global supabase
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+            logger.info("Supabase client initialized successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize Supabase client: {str(e)}")
+    else:
+        logger.warning("Supabase credentials are missing from environment variables.")
 
 class ProjectResponse(BaseModel):
     id: int
@@ -54,12 +61,11 @@ def health_check():
     return {"status": "ok", "message": "Backend is active"}
 
 @app.get("/projects", response_model=List[ProjectResponse], status_code=status.HTTP_200_OK)
-@app.get("/projects/", response_model=List[ProjectResponse], include_in_schema=False)
 def get_projects():
     if not supabase:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Supabase client is not initialized"
+            detail="Database connection is not initialized."
         )
         
     try:
@@ -92,8 +98,8 @@ def get_projects():
         return sanitized_data
 
     except Exception as e:
-        logger.error(f"API Executing Error: {str(e)}", exc_info=True)
+        logger.error(f"Database Query Error: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal Database Query Error: {str(e)}"
+            detail="Internal Database Error"
         )
