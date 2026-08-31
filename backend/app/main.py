@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Portfolio API", version="1.0.0", redirect_slashes=False)
 
-# CORS Configuration
+# Enable CORS for All Origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,23 +22,17 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Safe Lazy Initialization for Supabase
+# Supabase Env Retrieval
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
+# Initialize Client directly to avoid lifecycle lock
 supabase: Optional[Client] = None
-
-@app.on_event("startup")
-def startup_event():
-    global supabase
-    if SUPABASE_URL and SUPABASE_KEY:
-        try:
-            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-            logger.info("Supabase client initialized successfully.")
-        except Exception as e:
-            logger.error(f"Failed to initialize Supabase client: {str(e)}")
-    else:
-        logger.warning("Supabase credentials are missing from environment variables.")
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        logger.error(f"Supabase init error: {str(e)}")
 
 class ProjectResponse(BaseModel):
     id: int
@@ -65,7 +59,7 @@ def get_projects():
     if not supabase:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database connection is not initialized."
+            detail="Database connection failed"
         )
         
     try:
@@ -98,8 +92,8 @@ def get_projects():
         return sanitized_data
 
     except Exception as e:
-        logger.error(f"Database Query Error: {str(e)}", exc_info=True)
+        logger.error(f"Error fetching projects: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Database Error"
+            detail=f"Database query error: {str(e)}"
         )
