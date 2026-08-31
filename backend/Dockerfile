@@ -1,12 +1,12 @@
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
+ENV PYTHONTONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=10000
 
 WORKDIR /app
 
-# ติดตั้ง Dependencies สำหรับ System
+# ติดตั้ง System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -18,5 +18,5 @@ COPY . .
 
 EXPOSE 10000
 
-# แก้ไขจุดนี้: ชี้ Import Path ไปยังโฟลเดอร์ app/main.py
+# รัน FastAPI โดยระบุ Module ตามโครงสร้างโฟลเดอร์
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000} --workers 1"]
