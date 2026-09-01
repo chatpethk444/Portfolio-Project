@@ -1,135 +1,67 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 
-const ContactForm = () => {
-  const [status, setStatus] = useState("idle"); // 'idle' | 'submitting' | 'success' | 'error'
+const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+
+export default function ContactForm() {
+  const [status, setStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+
+    if (!accessKey) {
+      setStatus("error");
+      setErrorMessage("Contact form is not configured.");
+      return;
+    }
+
     setStatus("submitting");
     setErrorMessage("");
-
-    const formData = new FormData(e.target);
-
-    // Access Key  https://web3forms.com
-    formData.append("access_key", "2ea60d4f-c11f-4c63-a278-c2fcd1733516");
+    const formData = new FormData(event.currentTarget);
+    formData.append("access_key", accessKey);
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: formData,
-      });
-
+      const response = await fetch(WEB3FORMS_URL, { method: "POST", body: formData });
       const result = await response.json();
-
-      if (result.success) {
-        setStatus("success");
-        e.target.reset();
-        setTimeout(() => setStatus("idle"), 5000); // รีเซ็ตสถานะปุ่มหลังผ่านไป 5 วินาที
-      } else {
-        setStatus("error");
-        setErrorMessage(result.message || "เกิดข้อผิดพลาดในการส่งข้อความ");
-      }
+      if (!response.ok || !result.success) throw new Error(result.message || "Submission failed.");
+      event.currentTarget.reset();
+      setStatus("success");
     } catch (error) {
       setStatus("error");
-      setErrorMessage(
-        "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง",
-      );
+      setErrorMessage(error.message || "Unable to send your message. Please try again.");
     }
-  };
+  }
+
+  const fieldClass = "mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition-all duration-200 focus:-translate-y-0.5 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-gray-700 dark:bg-gray-950";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-      className="w-full max-w-xl mx-auto mt-12 p-8 rounded-3xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 backdrop-blur-sm text-left"
+      initial={{ opacity: 0, y: 28, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.6 }}
+      className="mx-auto mt-8 w-full max-w-xl rounded-2xl border border-gray-200 bg-white/80 p-4 text-left shadow-2xl shadow-black/5 backdrop-blur sm:mt-10 sm:rounded-3xl sm:p-8 dark:border-gray-800 dark:bg-gray-900/60"
     >
-      <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-        Get in Touch
-      </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        มีโปรเจกต์ที่ต้องการปรึกษา หรือต้องการร่วมงานกัน?
-        ส่งข้อความหาผมได้เลยครับ
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Honeypot Spam Protection (ซ่อนไว้สำหรับดักจับ Bot) */}
-        <input
-          type="checkbox"
-          name="botcheck"
-          className="hidden"
-          style={{ display: "none" }}
-        />
-
-        <div>
-          <label className="block text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">
-            NAME
-          </label>
-          <input
-            type="text"
-            name="name"
-            required
-            placeholder="John Doe"
-            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-all text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">
-            EMAIL
-          </label>
-          <input
-            type="email"
-            name="email"
-            required
-            placeholder="john@example.com"
-            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-all text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">
-            MESSAGE
-          </label>
-          <textarea
-            name="message"
-            required
-            rows="4"
-            placeholder="Tell me about your project..."
-            className="w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-all text-sm resize-none"
-          ></textarea>
-        </div>
-
+      <h3 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">Get in Touch</h3>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <input type="checkbox" name="botcheck" className="hidden" tabIndex="-1" autoComplete="off" />
+        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">NAME<input type="text" name="name" required placeholder="John Doe" className={fieldClass} /></label>
+        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">EMAIL<input type="email" name="email" required placeholder="john@example.com" className={fieldClass} /></label>
+        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">MESSAGE<textarea name="message" required rows="5" placeholder="Tell me about your project..." className={`${fieldClass} resize-none`} /></label>
         <motion.button
-          whileHover={{ scale: 1.01 }}
+          whileHover={{ y: -2, boxShadow: "0 12px 30px rgba(16, 185, 129, 0.18)" }}
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={status === "submitting"}
-          className="w-full py-3.5 px-6 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
         >
-          {status === "submitting" ? (
-            <>
-              <span className="w-4 h-4 border-2 border-white dark:border-gray-900 border-t-transparent rounded-full animate-spin"></span>
-              Sending...
-            </>
-          ) : status === "success" ? (
-            "✓ Message Sent Successfully!"
-          ) : (
-            "Send Message"
-          )}
+          {status === "submitting" ? "Sending..." : status === "success" ? "✓ Message Sent" : "Send Message →"}
         </motion.button>
-
-        {status === "error" && (
-          <p className="text-xs text-red-500 mt-2 text-center">
-            {errorMessage}
-          </p>
-        )}
+        {status === "success" && <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-center text-xs text-emerald-500">Thanks! Your message has been sent successfully.</motion.p>}
+        {status === "error" && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-xs text-red-500">{errorMessage}</motion.p>}
       </form>
     </motion.div>
   );
-};
-
-export default ContactForm;
+}

@@ -1,77 +1,45 @@
-import os
 import logging
-from typing import List, Optional
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from supabase import create_client, Client
+from app.config import get_settings
+from app.database import get_supabase_client
+from app.routers.projects import router as projects_router
+from app.routers.certificates import router as certificates_router
+from app.schemas import HealthResponse
 
-# Logging Setup
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-app = FastAPI(title="Portfolio Backend API", version="1.0.0")
-
-# CORS Middleware (รองรับ Frontend จาก Vercel)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 
-# Initialize Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+settings = get_settings()
 
-supabase: Optional[Client] = None
-if SUPABASE_URL and SUPABASE_KEY:
-    try:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    except Exception as e:
-        logger.error(f"Failed to initialize Supabase: {str(e)}")
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.app_version,
+    description="REST API for the portfolio frontend.",
+)
 
-# Data Model
-class Project(BaseModel):
-    id: Optional[int] = None
-    title: str
-    description: Optional[str] = None
-    image_url: Optional[str] = None
-    tech_stack: Optional[List[str]] = None
-    github_link: Optional[str] = None
-    demo_link: Optional[str] = None
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 
-# Root Route
+app.include_router(projects_router)
+app.include_router(certificates_router)
+
 @app.get("/", status_code=status.HTTP_200_OK)
-def read_root():
-    return {"message": "Portfolio API is active", "docs": "/docs"}
+def read_root() -> dict[str, str]:
+    return {
+        "message": "Portfolio API is active",
+        "docs": "/docs",
+        "health": "/health",
+    }
 
-# Health Check Route (สำหรับ cron-job.org)
-@app.get("/health", status_code=status.HTTP_200_OK)
-def health_check():
-    return {"status": "ok"}
-
-# Projects Route (แก้ปัญหา 404 Not Found)
-@app.get("/projects", status_code=status.HTTP_200_OK)
-def get_projects():
-    if not supabase:
-        # Fallback Mock Data กรณีไม่ได้เชื่อมต่อ Supabase
-        return [
-            {
-                "id": 1,
-                "title": "Portfolio Web App",
-                "description": "Fullstack Portfolio Project with FastAPI & React",
-                "tech_stack": ["React", "FastAPI", "Docker", "Supabase"],
-            }
-        ]
-    
-    try:
-        response = supabase.table("projects").select("*").execute()
-        return response.data
-    except Exception as e:
-        logger.error(f"Database query error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch projects from database"
-        )
+@app.get("/health", response_model=HealthResponse, status_code=status.HTTP_200_OK)
+def health_check() -> HealthResponse:
+    database_status = "connected" if get_supabase_client() else "not_configured"
+    return HealthResponse(status="ok", database=database_status)
