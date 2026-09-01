@@ -143,8 +143,7 @@ export default function ProjectModal({ project, onClose }) {
 
             <motion.div variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {project.github_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.github_url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-gray-900/10 dark:bg-white dark:text-gray-900"><FaGithub /> GitHub</motion.a>}
-              {project.demo_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.demo_url} target="_blank" rel="noreferrer" className="rounded-xl border border-gray-300 px-4 py-3 text-center text-sm font-medium transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700">Live Demo</motion.a>}
-              {project.canva_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.canva_url} target="_blank" rel="noreferrer" className="rounded-xl border border-gray-300 px-4 py-3 text-center text-sm font-medium transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700">Presentation</motion.a>}
+              {project.canva_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.canva_url} target="_blank" rel="noreferrer" className="rounded-xl border border-gray-300 px-4 py-3 text-center text-sm font-medium transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700">Docs</motion.a>}
             </motion.div>
           </motion.div>
         </motion.article>
