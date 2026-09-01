@@ -1,6 +1,15 @@
 from functools import lru_cache
 from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+DEFAULT_CORS_ORIGINS = (
+    "http://localhost:5173,"
+    "https://portfolio-project-tawny-ten.vercel.app,"
+    "https://portfolio-project-solo-44fc.vercel.app"
+)
+
 
 class Settings(BaseSettings):
     app_name: str = "Portfolio Backend API"
@@ -8,7 +17,10 @@ class Settings(BaseSettings):
     environment: Literal["development", "production", "test"] = "development"
     supabase_url: str | None = None
     supabase_key: str | None = None
-    cors_origins: str = "http://localhost:5173"
+
+    # Comma-separated list of frontend origins allowed to call this API.
+    cors_origins: str = DEFAULT_CORS_ORIGINS
+
     enable_mock_data: bool = False
 
     model_config = SettingsConfigDict(
@@ -20,7 +32,12 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+        return [
+            origin.strip().rstrip("/")
+            for origin in self.cors_origins.split(",")
+            if origin.strip()
+        ]
+
 
 @lru_cache
 def get_settings() -> Settings:

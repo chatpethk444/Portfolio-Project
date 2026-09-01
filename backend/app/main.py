@@ -23,6 +23,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
+    allow_origin_regex=r"https://portfolio-project-[a-z0-9-]+\\.vercel\\.app",
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["Content-Type", "Authorization"],
