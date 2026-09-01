@@ -77,7 +77,7 @@ export default function App() {
             >
               Driven 4th-year Computer Engineering student seeking a Cooperative
               Education or Internship position in Software Tester / QA or
-              Full-Stack Development. Offers a robust technical foundation in
+              Full-Stack Developer. Offers a robust technical foundation in
               end-to-end web application development and hardware systems
               integration. Skilled in leveraging engineering problem-solving
               methodologies to tackle real-world challenges. Highly adaptable,

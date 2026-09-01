@@ -25,7 +25,7 @@ export default function DeveloperTerminal() {
           <p className="pl-3 sm:pl-4"><TypewriterText text="name: " className="text-blue-400" delay={1.1} /><TypewriterText text="'Chatpeth Karisuk'," className="text-green-300" delay={1.3} /></p>
           <p className="pl-3 sm:pl-4"><TypewriterText text="location: " className="text-blue-400" delay={1.6} /><TypewriterText text="'Bangkok, Thailand'," className="text-green-300" delay={1.8} /></p>
 
-          <p className="pl-3 sm:pl-4"><TypewriterText text="role: " className="text-blue-400" delay={2.1} /><TypewriterText text="'Software Tester / QA / Full-Stack Development'," className="text-green-300" delay={2.3} /></p>
+          <p className="pl-3 sm:pl-4"><TypewriterText text="role: " className="text-blue-400" delay={2.1} /><TypewriterText text="'Software Tester / QA / Full-Stack Developer'," className="text-green-300" delay={2.3} /></p>
           <p className="pl-3 sm:pl-4"><TypewriterText text="email: " className="text-blue-400" delay={2.1} /><TypewriterText text="'chatpethkarisuk@gmail.com'," className="text-green-300" delay={2.3} /></p>
           <p className="pl-3 sm:pl-4"><TypewriterText text="phone: " className="text-blue-400" delay={2.1} /><TypewriterText text="'091-021-6010'," className="text-green-300" delay={2.3} /></p>
 
