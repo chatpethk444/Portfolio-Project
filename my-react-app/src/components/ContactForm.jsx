@@ -55,7 +55,7 @@ export default function ContactForm() {
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={status === "submitting"}
-          className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+          className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3.5 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
         >
           {status === "submitting" ? "Sending..." : status === "success" ? "✓ Message Sent" : "Send Message →"}
         </motion.button>

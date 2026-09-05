@@ -23,9 +23,11 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
-    allow_origin_regex=r"https://portfolio-project-[a-z0-9-]+\\.vercel\\.app",
+    # Keep the production Vercel domain allowed even if Render's CORS_ORIGINS
+    # environment variable still contains an older value.
+    allow_origin_regex=r"https://(?:chatpethkarisuk-portfolio|portfolio-project-[a-z0-9-]+|chatpeth-portfolio(?:-[a-z0-9-]+)?)\.vercel\.app",
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["GET", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
 

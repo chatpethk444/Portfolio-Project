@@ -41,6 +41,7 @@ export default function ProjectImage({
       className={className}
       referrerPolicy="no-referrer"
       loading="lazy"
+      decoding="async"
       onError={handleError}
     />
   );

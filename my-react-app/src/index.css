@@ -113,6 +113,17 @@
   mask-image: linear-gradient(to bottom, black, transparent 65%);
 }
 
+.tech-logo {
+  transform-origin: center;
+  transition: transform 300ms ease, filter 300ms ease;
+  will-change: transform;
+}
+
+.group:hover .tech-logo {
+  transform: rotate(-8deg) scale(1.18);
+  filter: drop-shadow(0 0 7px currentColor);
+}
+
 .animated-gradient-text {
   background: linear-gradient(90deg, #10b981, #06b6d4, #3b82f6, #10b981);
   background-size: 250% 100%;

@@ -68,7 +68,7 @@ export default function Navbar({ darkMode, onToggleDarkMode }) {
           onClick={(event) => handleNavigate(event, "#home")}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          className="shrink-0 font-bold tracking-tight text-gray-900 dark:text-white"
+          className="shrink-0 cursor-pointer font-bold tracking-tight text-gray-900 dark:text-white"
         >
           Chatpeth<span className="text-emerald-500">.dev</span>
         </motion.a>
@@ -80,7 +80,7 @@ export default function Navbar({ darkMode, onToggleDarkMode }) {
                 key={href}
                 href={href}
                 onClick={(event) => handleNavigate(event, href)}
-                className="rounded-lg px-3 py-2 transition-all duration-200 hover:bg-emerald-500/10 hover:text-emerald-500"
+                className="cursor-pointer rounded-lg px-3 py-2 transition-all duration-200 hover:bg-emerald-500/10 hover:text-emerald-500"
               >
                 {label}
               </a>
@@ -95,7 +95,7 @@ export default function Navbar({ darkMode, onToggleDarkMode }) {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             whileTap={{ scale: 0.9 }}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-700 transition-colors hover:border-emerald-400 hover:text-emerald-600 md:hidden dark:border-gray-800 dark:text-gray-200"
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-gray-200 text-gray-700 transition-colors hover:border-emerald-400 hover:text-emerald-600 md:hidden dark:border-gray-800 dark:text-gray-200"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
@@ -131,7 +131,7 @@ export default function Navbar({ darkMode, onToggleDarkMode }) {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-white hover:text-emerald-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                    className="cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-white hover:text-emerald-600 dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     {label}
                   </motion.a>

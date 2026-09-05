@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { HiDownload } from "react-icons/hi";
 import { motion } from "framer-motion";
 
 import profileImage from "./assets/profile.jpg";
@@ -100,7 +101,7 @@ export default function App() {
                 title="GitHub"
                 whileHover={{ y: -3, scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white/70 text-gray-800 shadow-sm backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white/70 text-gray-800 shadow-sm backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
               >
                 <FaGithub className="h-5 w-5" />
               </motion.a>
@@ -113,7 +114,7 @@ export default function App() {
                 title="LinkedIn"
                 whileHover={{ y: -3, scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white/70 text-gray-800 shadow-sm backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white/70 text-gray-800 shadow-sm backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
               >
                 <FaLinkedin className="h-5 w-5" />
               </motion.a>
@@ -129,7 +130,7 @@ export default function App() {
                 href="#projects"
                 whileHover={{ y: -3, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className="group rounded-xl bg-gray-900 px-5 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition-shadow hover:shadow-xl dark:bg-white dark:text-gray-900"
+                className="group cursor-pointer rounded-xl bg-gray-900 px-5 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition-shadow hover:shadow-xl dark:bg-white dark:text-gray-900"
               >
                 View Projects{" "}
                 <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
@@ -137,10 +138,22 @@ export default function App() {
                 </span>
               </motion.a>
               <motion.a
+                href="https://drive.google.com/file/d/1-Z1Nttzmcnf15t78EL1VkMWLxjhpHq49/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white/50 px-5 py-3 text-center text-sm font-semibold backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700 dark:bg-gray-900/40"
+                aria-label="Download Resume"
+              >
+                <HiDownload className="h-5 w-5" />
+                Download Resume
+              </motion.a>
+              <motion.a
                 href="#connect"
                 whileHover={{ y: -3 }}
                 whileTap={{ scale: 0.97 }}
-                className="rounded-xl border border-gray-300 bg-white/50 px-5 py-3 text-center text-sm font-semibold backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700 dark:bg-gray-900/40"
+                className="cursor-pointer rounded-xl border border-gray-300 bg-white/50 px-5 py-3 text-center text-sm font-semibold backdrop-blur transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700 dark:bg-gray-900/40"
               >
                 Contact Me
               </motion.a>
@@ -168,6 +181,10 @@ export default function App() {
                   src={profileImage}
                   alt="Chatpeth Karisuk profile"
                   className="aspect-square w-full rounded-[1.15rem] object-cover object-center sm:rounded-[1.5rem]"
+                  width="640"
+                  height="640"
+                  decoding="async"
+                  fetchPriority="high"
                 />
                 <div className="absolute inset-2 rounded-[1.15rem] bg-gradient-to-t from-gray-950/20 to-transparent pointer-events-none sm:rounded-[1.5rem]" />
               </div>

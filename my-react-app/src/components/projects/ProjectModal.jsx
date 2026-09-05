@@ -63,7 +63,7 @@ export default function ProjectModal({ project, onClose }) {
             aria-label="Close"
             whileHover={{ rotate: 90, scale: 1.08 }}
             whileTap={{ scale: 0.9 }}
-            className="absolute right-3 top-3 z-20 rounded-full bg-gray-100 px-3 py-2 text-gray-600 transition-colors hover:bg-gray-200 sm:right-5 sm:top-5 dark:bg-gray-800 dark:text-gray-300"
+            className="absolute right-3 top-3 z-20 cursor-pointer rounded-full bg-gray-100 px-3 py-2 text-gray-600 transition-colors hover:bg-gray-200 sm:right-5 sm:top-5 dark:bg-gray-800 dark:text-gray-300"
           >
             ✕
           </motion.button>
@@ -72,7 +72,7 @@ export default function ProjectModal({ project, onClose }) {
             type="button"
             onClick={() => setFullScreen(true)}
             whileHover={{ scale: 1.01 }}
-            className="block w-full overflow-hidden rounded-2xl bg-gray-100 pr-8 dark:bg-gray-950 sm:pr-0"
+            className="block w-full cursor-pointer overflow-hidden rounded-2xl bg-gray-100 pr-8 dark:bg-gray-950 sm:pr-0"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -96,7 +96,7 @@ export default function ProjectModal({ project, onClose }) {
                   onClick={() => setActiveImageIndex(index)}
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`h-14 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors sm:h-16 sm:w-20 ${index === activeImageIndex ? "border-emerald-500 shadow-md shadow-emerald-500/20" : "border-transparent"}`}
+                  className={`h-14 w-16 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 transition-colors sm:h-16 sm:w-20 ${index === activeImageIndex ? "border-emerald-500 shadow-md shadow-emerald-500/20" : "border-transparent"}`}
                 >
                   <ProjectImage src={image} alt={`${project.title} ${index + 1}`} fallbackTitle="Image unavailable" className="h-full w-full object-cover" />
                 </motion.button>
@@ -142,8 +142,8 @@ export default function ProjectModal({ project, onClose }) {
             )}
 
             <motion.div variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {project.github_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.github_url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-gray-900/10 dark:bg-white dark:text-gray-900"><FaGithub /> GitHub Repository</motion.a>}
-              {project.canva_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.canva_url} target="_blank" rel="noreferrer" className="rounded-xl border border-gray-300 px-4 py-3 text-center text-sm font-medium transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700">Docs</motion.a>}
+              {project.github_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.github_url} target="_blank" rel="noreferrer" className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-gray-900/10 dark:bg-white dark:text-gray-900"><FaGithub /> GitHub Repository</motion.a>}
+              {project.canva_url && <motion.a whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} href={project.canva_url} target="_blank" rel="noreferrer" className="cursor-pointer rounded-xl border border-gray-300 px-4 py-3 text-center text-sm font-medium transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700">Docs</motion.a>}
             </motion.div>
           </motion.div>
         </motion.article>

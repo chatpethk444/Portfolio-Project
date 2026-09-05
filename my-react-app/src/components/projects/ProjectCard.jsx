@@ -15,7 +15,7 @@ export default function ProjectCard({ project, onSelect }) {
       onClick={() => onSelect(project)}
       whileHover={{ y: -8 }}
       whileTap={{ scale: 0.985 }}
-      className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-sm transition-all duration-300 hover:border-emerald-300 hover:shadow-2xl hover:shadow-emerald-500/10 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-emerald-500/40"
+      className="group flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-sm transition-all duration-300 hover:border-emerald-300 hover:shadow-2xl hover:shadow-emerald-500/10 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-emerald-500/40"
     >
       <div className="relative h-48 overflow-hidden bg-gray-100 sm:h-52 dark:bg-gray-950">
         <ProjectImage
