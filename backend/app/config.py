@@ -8,6 +8,9 @@ DEFAULT_CORS_ORIGINS = (
     "http://localhost:5173,"
     "https://portfolio-project-tawny-ten.vercel.app,"
     "https://portfolio-project-solo-44fc.vercel.app"
+    "https://chatpeth-portfolio.vercel.app"    
+    "https://chatpeth-portfolio-git-main-solo-44fc.vercel.app"
+    "https://chatpeth-portfolio-foylqsgy4-solo-44fc.vercel.app"
 )
 
 
